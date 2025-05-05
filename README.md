@@ -1,4 +1,5 @@
 # StepLED
+![image](https://github.com/user-attachments/assets/568e615d-b8c2-4a11-9fa5-dd01503a4e3c)
 
 세 개의 LED를 스위로 순차 제어하며, 이를 웹 가상 모델에서 실시간으로 모니터링하고 제어할 수 있는 양방향 디지털 트윈 시스템입니다.
 
@@ -44,6 +45,11 @@ npm run dev
 
 ## 📝 앞으로의 개선 방향
 
-- **Polling 방식 → WebSocket / MQTT 이벤트 기반 통신으로 전환**
+- Polling 방식 → WebSocket / MQTT 이벤트 기반 통신으로 전환
 
 ## 📷 시연 이미지
+<div align="left">
+  <img alt="image" src="https://github.com/user-attachments/assets/d31aec71-2bd1-4e65-baf5-63bdc32da4be" width="35%"/>
+</div>
+
+[시연 동영상](https://pub-80a42cc7d41749078071917a4265d3ca.r2.dev/StepLED.mp4)
