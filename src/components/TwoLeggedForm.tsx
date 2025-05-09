@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { FiCopy, FiLoader, FiEye } from "react-icons/fi";
+// import { FiCopy, FiLoader, FiEye } from "react-icons/fi";
+import { FiCopy, FiLoader } from "react-icons/fi";
 
 export default function TwoLeggedForm({
   onTokenSet,
@@ -15,8 +16,8 @@ export default function TwoLeggedForm({
   const [token, setToken] = useState<Token | null>(null);
   const [expiryTime, setExpiryTime] = useState(0);
   const [countdown, setCountdown] = useState(0);
-  const [file, setFile] = useState<File | null>(null);
-  const [urn, setUrn] = useState("");
+  // const [file, setFile] = useState<File | null>(null);
+  // const [urn, setUrn] = useState("");
   const [loading, setLoading] = useState({ auth: false, upload: false });
 
   const getToken = useCallback(async () => {
@@ -65,37 +66,37 @@ export default function TwoLeggedForm({
       alert("토큰이 복사되었습니다.");
     }
   };
-  const copyUrn = async () => {
-    if (urn) {
-      await navigator.clipboard.writeText(urn);
-      alert("Model URN이 복사되었습니다.");
-    }
-  };
-  const viewModel = () => {
-    const q = new URLSearchParams({
-      urn,
-      token: token?.access_token || "",
-    }).toString();
-    window.open(`/viewer?${q}`, "forgeViewer", "width=800,height=600");
-  };
+  // const copyUrn = async () => {
+  //   if (urn) {
+  //     await navigator.clipboard.writeText(urn);
+  //     alert("Model URN이 복사되었습니다.");
+  //   }
+  // };
+  // const viewModel = () => {
+  //   const q = new URLSearchParams({
+  //     urn,
+  //     token: token?.access_token || "",
+  //   }).toString();
+  //   window.open(`/viewer?${q}`, "forgeViewer", "width=800,height=600");
+  // };
 
-  const uploadTranslate = async () => {
-    setLoading((s) => ({ auth: s.auth, upload: true }));
-    if (!token) return;
-    const form = new FormData();
-    form.append("access_token", token.access_token);
-    form.append("file", file as File);
-    try {
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      const data = await res.json();
-      setUrn(data.urn);
-    } catch (e) {
-      console.error("Upload error:", e);
-      alert("문제가 발생하였습니다. 다시 시도해주세요.");
-    } finally {
-      setLoading((s) => ({ auth: s.auth, upload: false }));
-    }
-  };
+  // const uploadTranslate = async () => {
+  //   setLoading((s) => ({ auth: s.auth, upload: true }));
+  //   if (!token) return;
+  //   const form = new FormData();
+  //   form.append("access_token", token.access_token);
+  //   form.append("file", file as File);
+  //   try {
+  //     const res = await fetch("/api/upload", { method: "POST", body: form });
+  //     const data = await res.json();
+  //     setUrn(data.urn);
+  //   } catch (e) {
+  //     console.error("Upload error:", e);
+  //     alert("문제가 발생하였습니다. 다시 시도해주세요.");
+  //   } finally {
+  //     setLoading((s) => ({ auth: s.auth, upload: false }));
+  //   }
+  // };
 
   return (
     <div className="space-y-4">
@@ -152,7 +153,7 @@ export default function TwoLeggedForm({
             <span className="font-semibold">{countdown}s</span>
           </p>
 
-          <div className="space-y-6">
+          {/* <div className="space-y-6">
             <input
               type="file"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
@@ -189,7 +190,7 @@ export default function TwoLeggedForm({
                 <FiEye size={20} />
               </button>
             </div>
-          )}
+          )} */}
         </div>
       )}
     </div>
