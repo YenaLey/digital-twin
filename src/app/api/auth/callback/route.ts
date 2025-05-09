@@ -15,8 +15,8 @@ export async function GET(request: Request) {
     );
   }
 
-  const decodedState = decodeURIComponent(stateParam);
-  const [client_id, client_secret] = Buffer.from(decodedState, "base64")
+  const decoded = decodeURIComponent(stateParam);
+  const [client_id, client_secret] = Buffer.from(decoded, "base64")
     .toString()
     .split(":");
 
@@ -46,22 +46,19 @@ export async function GET(request: Request) {
       callbackURL,
       scope,
     });
-  } catch (error: unknown) {
-    console.error("3-legged callback error:", error);
-    const message = error instanceof Error ? error.message : "Callback error";
-
-    // forge-apis 에러 타입
+  } catch (err: unknown) {
+    console.error("3-legged callback error:", err);
+    const message = err instanceof Error ? err.message : "Callback error";
     type ForgeError = { response?: { status?: number } };
     let status = 500;
     if (
-      typeof error === "object" &&
-      error !== null &&
-      "response" in error &&
-      typeof (error as ForgeError).response?.status === "number"
+      typeof err === "object" &&
+      err !== null &&
+      "response" in err &&
+      typeof (err as ForgeError).response?.status === "number"
     ) {
-      status = (error as ForgeError).response!.status!;
+      status = (err as ForgeError).response!.status!;
     }
-
     return NextResponse.json({ error: message }, { status });
   }
 }
