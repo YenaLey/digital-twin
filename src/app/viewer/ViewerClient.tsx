@@ -1,69 +1,93 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import Script from "next/script";
 import { useSearchParams } from "next/navigation";
 
 export default function ViewerClient() {
   const viewerRef = useRef<HTMLDivElement>(null);
+  const initialized = useRef(false);
+
   const params = useSearchParams();
-  const rawUrn = params.get("urn") || "";
-  const token = params.get("token") || "";
+  const rawUrn = params.get("urn") ?? "";
+  const token = params.get("token") ?? "";
+
+  const loadModel = useCallback(() => {
+    const Autodesk = (window as any).Autodesk;
+    if (!Autodesk?.Viewing) return;
+
+    let urn = rawUrn;
+    const pattern = /^(urn|https?):/;
+    if (!pattern.test(urn)) urn = "urn:" + urn;
+
+    const viewer = new Autodesk.Viewing.GuiViewer3D(viewerRef.current, {
+      extensions: ["Autodesk.DocumentBrowser"],
+    });
+    viewer.start();
+
+    Autodesk.Viewing.Document.load(
+      urn,
+      (doc: any) => {
+        console.log("Document.load succeeded");
+
+        const root = doc.getRoot();
+        const items = root.search({ type: "geometry", role: "3d" });
+        const viewable =
+          items.length > 0 ? items[0] : root.getDefaultGeometry?.();
+
+        if (!viewable) {
+          console.error("🚨 No viewable geometry found in document");
+          return;
+        }
+
+        viewer
+          .loadDocumentNode(doc, viewable)
+          .then((model: any) =>
+            console.log("loadDocumentNode succeeded", model)
+          )
+          .catch((err: any) => console.error("loadDocumentNode failed", err));
+      },
+      (err: any) => {
+        console.error("🚨 Document.load failed", err);
+      },
+      (progress: number) =>
+        console.log(`🔄 Translation: ${(progress * 100).toFixed(0)}%`)
+    );
+  }, [rawUrn]);
+
+  const initialize = useCallback(() => {
+    if (initialized.current) return;
+    const Autodesk = (window as any).Autodesk;
+    if (!Autodesk?.Viewing) return;
+
+    initialized.current = true;
+
+    Autodesk.Viewing.Initializer(
+      {
+        env: "AutodeskProduction",
+        getAccessToken: (onToken: (t: string, e: number) => void) => {
+          onToken(token, 3600);
+        },
+      },
+      loadModel
+    );
+  }, [loadModel, token]);
 
   useEffect(() => {
-    if (!(window as any).Autodesk?.Viewing) return;
-
-    const options = {
-      env: "AutodeskProduction",
-      getAccessToken: (onToken: (tok: string, exp: number) => void) => {
-        onToken(token, 3600);
-      },
-    };
-
-    (window as any).Autodesk.Viewing.Initializer(options, () => {
-      const viewer = new (window as any).Autodesk.Viewing.GuiViewer3D(
-        viewerRef.current
-      );
-      viewer.start();
-
-      const urn = rawUrn.startsWith("urn:") ? rawUrn : `urn:${rawUrn}`;
-
-      (window as any).Autodesk.Viewing.Document.load(
-        urn,
-        (doc: any) => {
-          let viewables: any[] = [];
-          const Doc = (window as any).Autodesk.Viewing.Document as any;
-
-          if (typeof Doc.getSubItemsWithProperties === "function") {
-            viewables = Doc.getSubItemsWithProperties(
-              doc.getRoot(),
-              { type: "geometry" },
-              true
-            );
-          } else {
-            viewables = [doc.getRoot().getDefaultGeometry()];
-          }
-
-          if (viewables.length === 0) {
-            console.error("No viewable geometry found.");
-            return;
-          }
-
-          viewer.loadDocumentNode(doc, viewables[0]);
-        },
-        (err: any) => {
-          console.error("Document.load failed:", err);
-        }
-      );
-    });
-  }, [rawUrn, token]);
+    initialize();
+    const id = setInterval(initialize, 500);
+    return () => clearInterval(id);
+  }, [initialize]);
 
   return (
     <>
       <Script
         src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
+        onLoad={() => {
+          console.log("▶ Autodesk.Viewing script loaded");
+          initialize();
+        }}
       />
       <link
         rel="stylesheet"
@@ -71,9 +95,9 @@ export default function ViewerClient() {
       />
 
       <div
+        id="viewer"
         ref={viewerRef}
         style={{ width: "100%", height: "80vh" }}
-        id="forgeViewer"
       />
     </>
   );
