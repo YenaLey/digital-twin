@@ -4,16 +4,17 @@ import { AuthClientThreeLegged } from "forge-apis";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
+  const stateParam = url.searchParams.get("state");
 
-  if (!code || !state) {
+  if (!code || !stateParam) {
     return NextResponse.json(
       { error: "Missing code or state" },
       { status: 400 }
     );
   }
 
-  const [client_id, client_secret] = Buffer.from(state, "base64")
+  const decodedState = decodeURIComponent(stateParam);
+  const [client_id, client_secret] = Buffer.from(decodedState, "base64")
     .toString()
     .split(":");
 
@@ -46,18 +47,12 @@ export async function GET(request: Request) {
     });
   } catch (error: unknown) {
     console.error("3-legged callback error:", error);
-
     const message = error instanceof Error ? error.message : "Callback error";
-
     const status =
-      typeof error === "object" &&
-      error !== null &&
-      "response" in error &&
-      typeof (error as { response?: { status?: number } }).response?.status ===
-        "number"
-        ? (error as { response: { status: number } }).response.status
+      (error as any)?.response?.status &&
+      typeof (error as any).response.status === "number"
+        ? (error as any).response.status
         : 500;
-
     return NextResponse.json({ error: message }, { status });
   }
 }

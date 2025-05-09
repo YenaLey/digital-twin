@@ -26,6 +26,8 @@ export default function ThreeLeggedForm({
 
   const startAuth = () => {
     const { client_id, client_secret } = creds;
+    const rawState = btoa(`${client_id}:${client_secret}`);
+    const safeState = encodeURIComponent(encodeURIComponent(rawState));
     const callbackURL = `${window.location.origin}/auth/callback`;
     const scope = [
       "data:read",
@@ -34,14 +36,13 @@ export default function ThreeLeggedForm({
       "bucket:create",
       "viewables:read",
     ];
-    const st = btoa(`${client_id}:${client_secret}`);
     const authUrl = [
       "https://developer.api.autodesk.com/authentication/v2/authorize",
       `?response_type=code`,
       `&client_id=${encodeURIComponent(client_id)}`,
       `&redirect_uri=${encodeURIComponent(callbackURL)}`,
       `&scope=${encodeURIComponent(scope.join(" "))}`,
-      `&state=${encodeURIComponent(st)}`,
+      `&state=${safeState}`,
     ].join("");
     window.location.href = authUrl;
   };
@@ -49,15 +50,19 @@ export default function ThreeLeggedForm({
   useEffect(() => {
     if (!code || !state) return;
     setLoading({ auth: true, refresh: false });
-    fetch(`/api/auth/callback?code=${code}&state=${state}`)
+
+    const decodedState = decodeURIComponent(state);
+    fetch(
+      `/api/auth/callback?code=${code}&state=${encodeURIComponent(
+        decodedState
+      )}`
+    )
       .then((r) => r.json())
       .then((data: TokenInfo) => {
         setTokenInfo(data);
         onTokenSet();
-        const expireAt = Date.now() + data.expires_in * 1000;
-        setExpiryTime(expireAt);
-        setCountdown(Math.floor((expireAt - Date.now()) / 1000));
       })
+      .catch(console.error)
       .finally(() => setLoading({ auth: false, refresh: false }));
   }, [code, state, onTokenSet]);
 
