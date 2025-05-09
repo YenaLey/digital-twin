@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -26,13 +27,14 @@ export default function ViewerClient() {
       );
       viewer.start();
 
-      let urn = rawUrn.startsWith("urn:") ? rawUrn : `urn:${rawUrn}`;
+      const urn = rawUrn.startsWith("urn:") ? rawUrn : `urn:${rawUrn}`;
 
       (window as any).Autodesk.Viewing.Document.load(
         urn,
         (doc: any) => {
           let viewables: any[] = [];
           const Doc = (window as any).Autodesk.Viewing.Document as any;
+
           if (typeof Doc.getSubItemsWithProperties === "function") {
             viewables = Doc.getSubItemsWithProperties(
               doc.getRoot(),
