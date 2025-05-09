@@ -12,7 +12,7 @@ Autodesk Platform Services(APS)의 2-legged 및 3-legged 인증 방식을 통해
    - “Traditional Web App” 방식으로 새 애플리케이션을 생성합니다.
    - Callback URL에 다음을 추가합니다:
      ```
-     http://localhost:3000/auth/callback
+     http://aps-token-generator.netlify.app/auth/callback
      ```
    - Client ID와 Client Secret을 복사합니다.
 

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     title: "APS Token Generator",
     description:
       "generating 2-legged and 3-legged tokens for Autodesk API access",
-    url: "http://localhost:3000",
+    url: "https://aps-token-generator.netlify.app",
     type: "website",
     images: [
       {
