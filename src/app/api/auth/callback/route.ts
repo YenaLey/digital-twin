@@ -44,11 +44,20 @@ export async function GET(request: Request) {
       callbackURL,
       scope,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("3-legged callback error:", error);
-    return NextResponse.json(
-      { error: error.message || "Callback error" },
-      { status: error.response?.status || 500 }
-    );
+
+    const message = error instanceof Error ? error.message : "Callback error";
+
+    const status =
+      typeof error === "object" &&
+      error !== null &&
+      "response" in error &&
+      typeof (error as { response?: { status?: number } }).response?.status ===
+        "number"
+        ? (error as { response: { status: number } }).response.status
+        : 500;
+
+    return NextResponse.json({ error: message }, { status });
   }
 }

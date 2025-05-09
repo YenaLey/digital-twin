@@ -22,7 +22,14 @@ export async function POST(request: Request) {
   } catch (error: unknown) {
     console.error("twolegged error:", error);
     const message = error instanceof Error ? error.message : "Internal Error";
-    const status = (error as any)?.response?.status || 500;
+    const status =
+      typeof error === "object" &&
+      error !== null &&
+      "response" in error &&
+      typeof (error as { response?: { status?: number } }).response?.status ===
+        "number"
+        ? (error as { response: { status: number } }).response.status
+        : 500;
     return NextResponse.json({ error: message }, { status });
   }
 }
