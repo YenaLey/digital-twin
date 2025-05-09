@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import os from "os";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
@@ -24,10 +25,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const tmpDir = path.join(process.cwd(), "tmp");
-    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
+    const baseTmp = path.join(os.tmpdir(), "aps-upload");
+    if (!fs.existsSync(baseTmp)) {
+      fs.mkdirSync(baseTmp, { recursive: true });
+    }
+
     const filename = crypto.randomBytes(8).toString("hex") + "-" + file.name;
-    const filepath = path.join(tmpDir, filename);
+    const filepath = path.join(baseTmp, filename);
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.promises.writeFile(filepath, buffer);
 
@@ -87,7 +91,7 @@ export async function POST(request: Request) {
     try {
       await fs.promises.unlink(filepath);
     } catch (err) {
-      console.warn("delete error:", err);
+      console.warn("임시 파일 삭제 실패:", err);
     }
 
     return NextResponse.json({ urn });

@@ -4,83 +4,58 @@ import { useEffect, useRef } from "react";
 import Script from "next/script";
 import { useSearchParams } from "next/navigation";
 
-declare global {
-  interface Window {
-    Autodesk?: typeof Autodesk;
-  }
-
-  const Autodesk: {
-    Viewing: {
-      Initializer: (
-        options: {
-          env: string;
-          getAccessToken: (
-            callback: (token: string, expire: number) => void
-          ) => void;
-        },
-        callback: () => void
-      ) => void;
-      GuiViewer3D: new (
-        container: HTMLDivElement | null,
-        options?: { extensions?: string[] }
-      ) => {
-        start: () => void;
-        loadDocumentNode: (doc: unknown, defaultModel: unknown) => void;
-      };
-      Document: {
-        load: (
-          urn: string,
-          onSuccess: (doc: AutodeskDocument) => void,
-          onFailure: (error: unknown) => void
-        ) => void;
-      };
-    };
-  };
-
-  interface AutodeskDocument {
-    getRoot: () => {
-      getDefaultGeometry: () => unknown;
-    };
-  }
-}
-
-export default function ViewerPage() {
+export default function ViewerClient() {
   const viewerRef = useRef<HTMLDivElement>(null);
   const params = useSearchParams();
-  const urnParam = params.get("urn") ?? "";
-  const tokenParam = params.get("token") ?? "";
+  const rawUrn = params.get("urn") || "";
+  const token = params.get("token") || "";
 
   useEffect(() => {
-    if (!window.Autodesk) return;
+    if (!(window as any).Autodesk?.Viewing) return;
 
     const options = {
       env: "AutodeskProduction",
-      getAccessToken: (cb: (token: string, expire: number) => void) =>
-        cb(tokenParam, 3599),
+      getAccessToken: (onToken: (tok: string, exp: number) => void) => {
+        onToken(token, 3600);
+      },
     };
 
-    window.Autodesk.Viewing.Initializer(options, () => {
-      const viewer = new window.Autodesk!.Viewing.GuiViewer3D(
-        viewerRef.current,
-        {
-          extensions: ["Autodesk.DocumentBrowser"],
-        }
+    (window as any).Autodesk.Viewing.Initializer(options, () => {
+      const viewer = new (window as any).Autodesk.Viewing.GuiViewer3D(
+        viewerRef.current
       );
       viewer.start();
 
-      let urn = urnParam;
-      if (!/^urn:/.test(urn)) urn = "urn:" + urn;
+      let urn = rawUrn.startsWith("urn:") ? rawUrn : `urn:${rawUrn}`;
 
-      window.Autodesk!.Viewing.Document.load(
+      (window as any).Autodesk.Viewing.Document.load(
         urn,
-        (doc) => {
-          const defaultModel = doc.getRoot().getDefaultGeometry();
-          viewer.loadDocumentNode(doc, defaultModel);
+        (doc: any) => {
+          let viewables: any[] = [];
+          const Doc = (window as any).Autodesk.Viewing.Document as any;
+          if (typeof Doc.getSubItemsWithProperties === "function") {
+            viewables = Doc.getSubItemsWithProperties(
+              doc.getRoot(),
+              { type: "geometry" },
+              true
+            );
+          } else {
+            viewables = [doc.getRoot().getDefaultGeometry()];
+          }
+
+          if (viewables.length === 0) {
+            console.error("No viewable geometry found.");
+            return;
+          }
+
+          viewer.loadDocumentNode(doc, viewables[0]);
         },
-        (err) => console.error("Document load error", err)
+        (err: any) => {
+          console.error("Document.load failed:", err);
+        }
       );
     });
-  }, [urnParam, tokenParam]);
+  }, [rawUrn, token]);
 
   return (
     <>
@@ -92,10 +67,11 @@ export default function ViewerPage() {
         rel="stylesheet"
         href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css"
       />
+
       <div
-        id="forgeViewer"
         ref={viewerRef}
-        style={{ width: "100%", height: "90vh" }}
+        style={{ width: "100%", height: "80vh" }}
+        id="forgeViewer"
       />
     </>
   );
