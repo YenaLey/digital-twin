@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
 import { AuthClientThreeLegged } from "forge-apis";
 
@@ -35,7 +37,6 @@ export async function GET(request: Request) {
       scope
     );
     const tokenInfo = await three.getToken(code);
-
     return NextResponse.json({
       access_token: tokenInfo.access_token,
       refresh_token: tokenInfo.refresh_token,
@@ -49,12 +50,8 @@ export async function GET(request: Request) {
     console.error("3-legged callback error:", error);
     const message = error instanceof Error ? error.message : "Callback error";
 
-    type ForgeError = {
-      response?: {
-        status?: number;
-      };
-    };
-
+    // forge-apis 에러 타입
+    type ForgeError = { response?: { status?: number } };
     let status = 500;
     if (
       typeof error === "object" &&
