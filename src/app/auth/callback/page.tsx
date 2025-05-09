@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import ThreeLeggedForm from "../../../components/ThreeLeggedForm";
 
 export default function CallbackPage() {
@@ -28,7 +29,9 @@ export default function CallbackPage() {
         </Link>
 
         <h2 className="text-2xl font-semibold mb-4">OAuth Callback</h2>
-        <ThreeLeggedForm onTokenSet={handleTokenSet} />
+        <Suspense fallback={<div>Loading...</div>}>
+          <ThreeLeggedForm onTokenSet={handleTokenSet} />
+        </Suspense>
       </div>
     </div>
   );

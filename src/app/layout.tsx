@@ -5,8 +5,6 @@ export const metadata: Metadata = {
   title: "APS Token Generator",
   description:
     "generating 2-legged and 3-legged tokens for Autodesk API access",
-  viewport:
-    "width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1",
   openGraph: {
     title: "APS Token Generator",
     description:
@@ -25,6 +23,11 @@ export const metadata: Metadata = {
   icons: {
     icon: "/assets/favicon.png",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
