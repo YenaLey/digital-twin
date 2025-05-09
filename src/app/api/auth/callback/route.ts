@@ -48,11 +48,23 @@ export async function GET(request: Request) {
   } catch (error: unknown) {
     console.error("3-legged callback error:", error);
     const message = error instanceof Error ? error.message : "Callback error";
-    const status =
-      (error as any)?.response?.status &&
-      typeof (error as any).response.status === "number"
-        ? (error as any).response.status
-        : 500;
+
+    type ForgeError = {
+      response?: {
+        status?: number;
+      };
+    };
+
+    let status = 500;
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "response" in error &&
+      typeof (error as ForgeError).response?.status === "number"
+    ) {
+      status = (error as ForgeError).response!.status!;
+    }
+
     return NextResponse.json({ error: message }, { status });
   }
 }
