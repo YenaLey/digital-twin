@@ -30,12 +30,17 @@ export default function ThreeLeggedForm({
 
     const redirect = `${window.location.origin}/auth/callback`;
     const scope = [
+      "viewables:read",
       "data:read",
       "data:write",
-      "bucket:read",
+      "data:create",
+      "data:search",
       "bucket:create",
-      "viewables:read",
+      "bucket:read",
+      "bucket:update",
+      "bucket:delete",
     ];
+
     const url = [
       "https://developer.api.autodesk.com/authentication/v2/authorize",
       `?response_type=code`,
