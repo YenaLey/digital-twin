@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/assets/thumbnail.png",
+        url: "https://aps-token-generator.netlify.app/assets/thumbnail.png",
         width: 1200,
         height: 630,
         alt: "APS Token Generator",
