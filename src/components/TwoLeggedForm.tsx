@@ -168,7 +168,12 @@ export default function TwoLeggedForm({
       setUrn(newUrn);
     } catch (err) {
       console.error("TwoLeggedForm :: upload & translate error:", err);
-      alert("문제가 발생하였습니다. 다시 시도해주세요.");
+      // alert("문제가 발생하였습니다. 다시 시도해주세요.");
+      alert(
+        "문제가 발생하였습니다.\n" +
+          "배포 환경에서는 큰 파일 업로드가 어렵습니다.\n" +
+          "코드를 직접 다운로드하여 로컬(localhost) 환경에서 실행해 주세요."
+      );
     } finally {
       setLoading((s) => ({ ...s, upload: false, translating: false }));
     }
