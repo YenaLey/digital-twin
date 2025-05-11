@@ -120,14 +120,8 @@ export default function TwoLeggedForm({
         throw new Error(`Signed URL 요청 실패: ${uploadRes.status}`);
       }
 
-      const {
-        signedUrl,
-        uploadKey,
-        bucketKey,
-        fileName,
-        urn: draftUrn,
-        fileType,
-      } = await uploadRes.json();
+      const { signedUrl, uploadKey, bucketKey, fileName, fileType } =
+        await uploadRes.json();
 
       const putRes = await fetch(signedUrl, {
         method: "PUT",
