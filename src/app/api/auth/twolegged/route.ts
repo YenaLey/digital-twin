@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import { AuthClientTwoLegged } from "forge-apis";
 
-interface TwoLeggedBody {
-  client_id: string;
-  client_secret: string;
-}
-
 export async function POST(request: Request) {
   try {
     const { client_id, client_secret } =
