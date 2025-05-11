@@ -23,7 +23,7 @@ Autodesk Platform Services(APS)의 2-legged 및 3-legged 인증 방식을 통해
 - Client ID와 Client Secret 입력
 - Access Token 발급
 - 만료 60초 전에 자동 갱신
-- Model URN 발급
+- Model URN 발급 (⚠️ 주의: 이 기능은 로컬 환경에서만 정상 작동합니다. Netlify 배포 환경에서는 대용량 파일 처리 제한으로 인해 오류가 발생할 수 있습니다.)
   1. OSS 버킷에 파일 업로드
   2. Model Derivative 변환 요청
   3. Model URN 발급
