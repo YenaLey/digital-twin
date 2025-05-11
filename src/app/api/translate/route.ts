@@ -1,37 +1,68 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { AuthClientTwoLegged, DerivativesApi } from "forge-apis";
 
-export async function POST(request: NextRequest) {
-  const body = (await request.json()) as TranslateRequestBody;
-  const { urn } = body;
-  if (!urn) {
-    return NextResponse.json({ error: "URN is required" }, { status: 400 });
-  }
+interface TranslateRequestBody {
+  urn?: string;
+}
 
-  const clientId = process.env.FORGE_CLIENT_ID;
-  const clientSecret = process.env.FORGE_CLIENT_SECRET;
-  if (!clientId || !clientSecret) {
-    console.error("Missing Forge credentials");
+export async function POST(request: NextRequest) {
+  const { urn } = (await request.json()) as TranslateRequestBody;
+
+  if (!urn) {
     return NextResponse.json(
-      { error: "Server configuration error" },
-      { status: 500 }
+      { error: "URN이 제공되지 않았습니다." },
+      { status: 400 }
     );
   }
 
-  const auth = new AuthClientTwoLegged(clientId, clientSecret, [
+  const clientId = request.cookies.get("forge_client_id")?.value;
+  const clientSecret = request.cookies.get("forge_client_secret")?.value;
+
+  if (!clientId || !clientSecret) {
+    return NextResponse.json(
+      { error: "인증 정보가 쿠키에 없습니다." },
+      { status: 401 }
+    );
+  }
+
+  const authClient = new AuthClientTwoLegged(clientId, clientSecret, [
     "data:read",
     "data:write",
     "data:create",
   ]);
-  await auth.authenticate();
 
-  const derivatives = new DerivativesApi();
+  await authClient.authenticate();
+
+  const derivativesApi = new DerivativesApi();
+
+  const job = {
+    input: {
+      urn,
+    },
+    output: {
+      formats: [{ type: "svf", views: ["2d", "3d"] }],
+    },
+  };
+
   try {
-    await derivatives.translate(urn, { xAdsForce: true }, auth, auth);
-    return NextResponse.json({ status: "pending", urn });
-  } catch (err: unknown) {
-    console.error("Translate API error:", err);
-    const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: message }, { status: 500 });
+    const response = await derivativesApi.translate(
+      job,
+      { xAdsForce: true },
+      authClient,
+      authClient.getCredentials()
+    );
+
+    return NextResponse.json({
+      status: "pending",
+      urn,
+      response: response.body,
+    });
+  } catch (error: unknown) {
+    console.error("Translate API error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json(
+      { error: message, details: error },
+      { status: 500 }
+    );
   }
 }

@@ -92,7 +92,7 @@ export default function ThreeLeggedForm({
       setExpiryTime(newExpireAt);
       setCountdown(Math.floor((newExpireAt - Date.now()) / 1000));
     } catch (err) {
-      console.error("Refresh error:", err);
+      console.error("ThreeLeggedForm refresh error:", err);
     } finally {
       setLoading({ auth: false, refresh: false });
     }
