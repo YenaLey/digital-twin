@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Suspense } from "react";
-import ThreeLeggedForm from "../../../components/ThreeLeggedForm";
+import ThreeLeggedForm from "@/components/ThreeLeggedForm";
 
 export default function CallbackPage() {
   const handleTokenSet = () => {};

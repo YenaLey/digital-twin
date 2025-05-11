@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-// import { FiCopy, FiLoader, FiEye } from "react-icons/fi";
-import { FiCopy, FiLoader } from "react-icons/fi";
+import { FiCopy, FiLoader, FiEye } from "react-icons/fi";
 
 export default function TwoLeggedForm({
   onTokenSet,
@@ -16,33 +15,34 @@ export default function TwoLeggedForm({
   const [token, setToken] = useState<Token | null>(null);
   const [expiryTime, setExpiryTime] = useState(0);
   const [countdown, setCountdown] = useState(0);
-  // const [file, setFile] = useState<File | null>(null);
-  // const [urn, setUrn] = useState("");
-  const [loading, setLoading] = useState({ auth: false, upload: false });
+  const [file, setFile] = useState<File | null>(null);
+  const [urn, setUrn] = useState("");
+  const [loading, setLoading] = useState({
+    auth: false,
+    upload: false,
+    translating: false,
+  });
 
   const getToken = useCallback(async () => {
-    setLoading({ auth: true, upload: false });
+    setLoading({ auth: true, upload: false, translating: false });
     try {
       const res = await fetch("/api/auth/twolegged", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(creds),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        alert("문제가 발생하였습니다. 다시 시도해주세요.");
-        return;
-      }
+      const data: Token = await res.json();
+      if (!res.ok) throw new Error(JSON.stringify(data));
       setToken(data);
       onTokenSet();
       const expireAt = Date.now() + data.expires_in * 1000;
       setExpiryTime(expireAt);
       setCountdown(Math.floor((expireAt - Date.now()) / 1000));
     } catch (err) {
-      console.error("Token fetch error:", err);
+      console.error(err);
       alert("문제가 발생하였습니다. 다시 시도해주세요.");
     } finally {
-      setLoading((s) => ({ auth: false, upload: s.upload }));
+      setLoading((s) => ({ ...s, auth: false }));
     }
   }, [creds, onTokenSet]);
 
@@ -55,9 +55,7 @@ export default function TwoLeggedForm({
   }, [token, expiryTime]);
 
   useEffect(() => {
-    if (token && countdown <= 60) {
-      getToken();
-    }
+    if (token && countdown <= 60) getToken();
   }, [countdown, getToken, token]);
 
   const copyToken = async () => {
@@ -66,37 +64,76 @@ export default function TwoLeggedForm({
       alert("토큰이 복사되었습니다.");
     }
   };
-  // const copyUrn = async () => {
-  //   if (urn) {
-  //     await navigator.clipboard.writeText(urn);
-  //     alert("Model URN이 복사되었습니다.");
-  //   }
-  // };
-  // const viewModel = () => {
-  //   const q = new URLSearchParams({
-  //     urn,
-  //     token: token?.access_token || "",
-  //   }).toString();
-  //   window.open(`/viewer?${q}`, "forgeViewer", "width=800,height=600");
-  // };
 
-  // const uploadTranslate = async () => {
-  //   setLoading((s) => ({ auth: s.auth, upload: true }));
-  //   if (!token) return;
-  //   const form = new FormData();
-  //   form.append("access_token", token.access_token);
-  //   form.append("file", file as File);
-  //   try {
-  //     const res = await fetch("/api/upload", { method: "POST", body: form });
-  //     const data = await res.json();
-  //     setUrn(data.urn);
-  //   } catch (e) {
-  //     console.error("Upload error:", e);
-  //     alert("문제가 발생하였습니다. 다시 시도해주세요.");
-  //   } finally {
-  //     setLoading((s) => ({ auth: s.auth, upload: false }));
-  //   }
-  // };
+  const copyUrn = async () => {
+    if (urn) {
+      await navigator.clipboard.writeText(urn);
+      alert("Model URN이 복사되었습니다.");
+    }
+  };
+
+  const viewModel = () => {
+    if (!token || !urn) return;
+    const q = new URLSearchParams({
+      urn,
+      token: token.access_token,
+    }).toString();
+    window.open(`/view.html?${q}`, "forgeViewer", "width=1024,height=768");
+  };
+
+  const translateProgress = async (modelUrn: string, accessToken: string) => {
+    let manifest: { progress?: string; status?: string } = {};
+    while (manifest.progress !== "complete") {
+      await new Promise((r) => setTimeout(r, 2000));
+      try {
+        const res = await fetch(
+          `/api/translate/${encodeURIComponent(
+            modelUrn
+          )}/progress?accessToken=${encodeURIComponent(accessToken)}`
+        );
+        if (!res.ok) {
+          console.warn(`Progress API error ${res.status}`);
+          continue;
+        }
+        manifest = await res.json();
+      } catch (e) {
+        console.warn("Invalid progress response", e);
+      }
+      if (manifest.status === "failed") {
+        throw new Error("Translation failed");
+      }
+    }
+  };
+
+  const uploadTranslate = async () => {
+    if (!token || !file) return;
+    setLoading((s) => ({ ...s, upload: true, translating: false }));
+    try {
+      const form = new FormData();
+      form.append("access_token", token.access_token);
+      form.append("file", file);
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: form,
+      });
+      if (!uploadRes.ok) {
+        const html = await uploadRes.text();
+        console.error("Upload failed, HTML:", html);
+        alert("문제가 발생하였습니다. 다시 시도해주세요.");
+        throw new Error(`Upload error ${uploadRes.status}`);
+      }
+      const { urn: newUrn } = await uploadRes.json();
+
+      setLoading((s) => ({ ...s, upload: false, translating: true }));
+      await translateProgress(newUrn, token.access_token);
+      setUrn(newUrn);
+    } catch (err) {
+      console.error(err);
+      alert("문제가 발생하였습니다. 다시 시도해주세요.");
+    } finally {
+      setLoading((s) => ({ ...s, upload: false, translating: false }));
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -109,7 +146,6 @@ export default function TwoLeggedForm({
           onChange={(e) => setCreds({ ...creds, client_id: e.target.value })}
         />
       </div>
-
       <div>
         <label className="block font-medium">Client Secret</label>
         <input
@@ -128,8 +164,7 @@ export default function TwoLeggedForm({
         disabled={!creds.client_id || !creds.client_secret || loading.auth}
         className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
       >
-        {loading.auth && <FiLoader className="animate-spin" />}
-        Get Token
+        {loading.auth && <FiLoader className="animate-spin" />} Get Token
       </button>
 
       {token && (
@@ -137,7 +172,7 @@ export default function TwoLeggedForm({
           <div className="flex items-start gap-2">
             <div className="flex-grow">
               <p className="font-medium">Access Token:</p>
-              <code className="break-all block text-sm text-gray-800">
+              <code className="break-all text-sm text-gray-800">
                 {token.access_token}
               </code>
             </div>
@@ -153,7 +188,7 @@ export default function TwoLeggedForm({
             <span className="font-semibold">{countdown}s</span>
           </p>
 
-          {/* <div className="space-y-6">
+          <div className="space-y-6">
             <input
               type="file"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
@@ -161,21 +196,30 @@ export default function TwoLeggedForm({
             />
             <button
               onClick={uploadTranslate}
-              disabled={!file || loading.upload}
+              disabled={!file || loading.upload || loading.translating}
               className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
             >
-              {loading.upload && <FiLoader className="animate-spin" />}
-              Upload & Translate
+              {loading.upload && (
+                <>
+                  <FiLoader className="animate-spin" /> Uploading…
+                </>
+              )}
+              {!loading.upload && loading.translating && (
+                <>
+                  <FiLoader className="animate-spin" /> Translating…
+                </>
+              )}
+              {!loading.upload && !loading.translating && (
+                <>Upload & Translate</>
+              )}
             </button>
           </div>
 
-          {urn && (
+          {urn && !loading.translating && (
             <div className="flex items-center gap-2 mt-3">
               <div className="flex-grow">
                 <p className="font-medium">Model URN:</p>
-                <code className="break-all text-sm text-gray-700 flex-grow">
-                  {urn}
-                </code>
+                <code className="break-all text-sm text-gray-700">{urn}</code>
               </div>
               <button
                 onClick={copyUrn}
@@ -190,7 +234,7 @@ export default function TwoLeggedForm({
                 <FiEye size={20} />
               </button>
             </div>
-          )} */}
+          )}
         </div>
       )}
     </div>

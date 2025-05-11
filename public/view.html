@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forge Viewer</title>
+    <link
+      rel="stylesheet"
+      href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css"
+    />
+    <link rel="stylesheet" href="./view.css" />
+  </head>
+  <body>
+    <div id="viewer"></div>
+
+    <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"></script>
+    <script>
+      window.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+        let urn = params.get("urn");
+        const token = params.get("token");
+
+        if (!urn || !token) {
+          alert("Missing URN or access token.");
+          return;
+        }
+
+        if (!urn.toLowerCase().startsWith("urn:")) {
+          urn = "urn:" + urn;
+        }
+
+        // Access token provider for Viewer
+        function getAccessToken(onSuccess) {
+          onSuccess(token, 3600);
+        }
+
+        const options = {
+          env: "AutodeskProduction",
+          getAccessToken: getAccessToken,
+        };
+
+        Autodesk.Viewing.Initializer(options, function () {
+          const viewerDiv = document.getElementById("viewer");
+          const viewer = new Autodesk.Viewing.GuiViewer3D(viewerDiv, {
+            extensions: ["Autodesk.DocumentBrowser"],
+          });
+          viewer.start();
+
+          Autodesk.Viewing.Document.load(
+            urn,
+            function (doc) {
+              const defaultModel = doc.getRoot().getDefaultGeometry();
+              viewer
+                .loadDocumentNode(doc, defaultModel)
+                .then(() => {
+                  console.log("Model loaded successfully.");
+                })
+                .catch((err) => {
+                  console.error("Error loading model node:", err);
+                  alert("Failed to load model. Check console for details.");
+                });
+            },
+            function (errorCode, errorMessage) {
+              console.error("Viewer error " + errorCode + ": " + errorMessage);
+              alert("Error loading document: " + errorMessage);
+            }
+          );
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { FiGithub } from "react-icons/fi";
-import TwoLeggedForm from "../components/TwoLeggedForm";
-import ThreeLeggedForm from "../components/ThreeLeggedForm";
+import TwoLeggedForm from "@/components/TwoLeggedForm";
+import ThreeLeggedForm from "@/components/ThreeLeggedForm";
 
 export default function Home() {
   const [flow, setFlow] = useState<"twolegged" | "threelegged">("twolegged");
