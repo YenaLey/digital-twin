@@ -103,7 +103,9 @@ export default function TwoLeggedForm({
 
   const uploadTranslate = async () => {
     if (!token || !file) return;
+
     setLoading((s) => ({ ...s, upload: true, translating: false }));
+
     try {
       const form = new FormData();
       form.append("access_token", token.access_token);
@@ -113,28 +115,65 @@ export default function TwoLeggedForm({
         method: "POST",
         body: form,
       });
+
       if (!uploadRes.ok) {
-        throw new Error(`TwoLeggedForm :: upload error : ${uploadRes.status}`);
+        throw new Error(`Signed URL 요청 실패: ${uploadRes.status}`);
       }
-      const { urn: newUrn } = await uploadRes.json();
+
+      const {
+        signedUrl,
+        uploadKey,
+        bucketKey,
+        fileName,
+        urn: draftUrn,
+        fileType,
+      } = await uploadRes.json();
+
+      const putRes = await fetch(signedUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": fileType,
+          "Content-Length": String(file.size),
+        },
+        body: file,
+      });
+
+      if (!putRes.ok) {
+        throw new Error(`파일 업로드 실패: ${putRes.status}`);
+      }
+
+      const finalizeRes = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uploadKey,
+          bucketKey,
+          fileName,
+          accessToken: token.access_token,
+        }),
+      });
+
+      if (!finalizeRes.ok) {
+        throw new Error(`Finalize 실패: ${finalizeRes.status}`);
+      }
+
+      const { urn: newUrn } = await finalizeRes.json();
 
       const translateRes = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ urn: newUrn }),
       });
+
       if (!translateRes.ok) {
-        throw new Error(
-          `TwoLeggedForm :: translate error : ${translateRes.status}`
-        );
+        throw new Error(`Translate 요청 실패: ${translateRes.status}`);
       }
 
       setLoading((s) => ({ ...s, upload: false, translating: true }));
       await translateProgress(newUrn, token.access_token);
-
       setUrn(newUrn);
     } catch (err) {
-      console.error(`TwoLeggedForm :: upload & translate error : ${err}`);
+      console.error("TwoLeggedForm :: upload & translate error:", err);
       alert("문제가 발생하였습니다. 다시 시도해주세요.");
     } finally {
       setLoading((s) => ({ ...s, upload: false, translating: false }));
