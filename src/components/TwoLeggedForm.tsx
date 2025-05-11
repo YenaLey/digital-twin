@@ -73,7 +73,6 @@ export default function TwoLeggedForm({
     while (true) {
       await new Promise((r) => setTimeout(r, 2000));
 
-      let manifest: any;
       try {
         const res = await fetch(
           `/api/translate/${encodeURIComponent(
@@ -84,15 +83,20 @@ export default function TwoLeggedForm({
           throw new Error(
             `TwoLeggedForm :: translateProgress error : ${res.status}`
           );
-        manifest = await res.json();
-      } catch {}
 
-      if (manifest.status === "failed") {
-        alert("문제가 발생하였습니다. 다시 시도해주세요.");
-        return;
-      }
-      if (manifest.status === "success") {
-        return;
+        const manifest = (await res.json()) as {
+          status: "pending" | "success" | "failed" | string;
+        };
+
+        if (manifest.status === "failed") {
+          alert("문제가 발생하였습니다. 다시 시도해주세요.");
+          return;
+        }
+        if (manifest.status === "success") {
+          return;
+        }
+      } catch (err) {
+        console.error("TwoLeggedForm :: manifest polling error:", err);
       }
     }
   };

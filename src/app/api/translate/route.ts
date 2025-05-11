@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AuthClientTwoLegged, DerivativesApi } from "forge-apis";
 
-interface TranslateRequestBody {
-  urn?: string;
-}
-
 export async function POST(request: NextRequest) {
   const { urn } = (await request.json()) as TranslateRequestBody;
 
