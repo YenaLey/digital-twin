@@ -16,8 +16,8 @@ export default function ThreeLeggedForm({
   const [loading, setLoading] = useState({ auth: false, refresh: false });
 
   const params = useSearchParams();
-  const code = params.get("code");
-  const state = params.get("state");
+  const code = params ? params.get("code") : null;
+  const state = params ? params.get("state") : null;
 
   const [origin, setOrigin] = useState("");
   useEffect(() => {
@@ -180,7 +180,7 @@ export default function ThreeLeggedForm({
   return (
     <div className="space-y-4 bg-white p-6 rounded-md shadow-md">
       <h3 className="text-xl font-semibold">3-Legged Token Info</h3>
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-4">
         <div className="flex-grow">
           <p className="font-medium">Access Token:</p>
           <code className="break-all block text-sm text-gray-800">

@@ -189,7 +189,7 @@ export default function TwoLeggedForm({
 
       {token && (
         <div className="bg-white p-4 rounded shadow space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-start gap-4">
             <code className="break-all">{token.access_token}</code>
             <button onClick={copyToken} className="text-blue-600">
               <FiCopy size={20} />

@@ -19,7 +19,7 @@ export default function CallbackPage() {
 
   return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center p-6">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg relative">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-4xl relative">
         <Link
           href="/"
           onClick={confirmAndNavigateHome}
