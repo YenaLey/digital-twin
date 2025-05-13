@@ -36,7 +36,7 @@ Autodesk Platform Services(APS)의 2-legged 및 3-legged 인증 방식을 통해
 - Access Token 발급
 - 만료 60초 전에 자동 갱신
 
-## local dev
+## Local
 
 ```bash
 git clone https://github.com/YenaLey/digital-twin.git
