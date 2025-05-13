@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --font-spoqaHanSansNeo: "Spoqa Han Sans Neo", sans-serif;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  overflow-x: hidden;
+}
+
+body,
+html {
+  @media (max-width: 900px) {
+    font-size: 15px;
+  }
+  @media (max-width: 700px) {
+    font-size: 14px;
+  }
+  @media (max-width: 600px) {
+    font-size: 13px;
+  }
+  @media (max-width: 500px) {
+    font-size: 12px;
+  }
+  @media (max-width: 400px) {
+    font-size: 11px;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
