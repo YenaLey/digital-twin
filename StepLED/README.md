@@ -1,7 +1,7 @@
 # StepLED
 ![image](https://github.com/user-attachments/assets/568e615d-b8c2-4a11-9fa5-dd01503a4e3c)
 
-세 개의 LED를 스위로 순차 제어하며, 이를 웹 가상 모델에서 실시간으로 모니터링하고 제어할 수 있는 양방향 디지털 트윈 시스템입니다.
+ESP32 보드에 연결된 세 개의 LED를 스위치로 순차 제어하며, 이를 Autodesk Tandem에서 실시간으로 모니터링하고 Autodesk Forge Viewer 기반 가상 모델에서 제어할 수 있는 양방향 디지털 트윈 프로젝트입니다.
 
 - Forge Viewer에서 **가상 스위치** 클릭 → 실제 ESP32 보드의 **LED 상태 제어**
 - ESP32 보드의 **실시간 상태 변화** → Tandem 및 웹 대시보드에 **동기화**
@@ -19,7 +19,7 @@
 - Autodesk Forge Viewer (2-legged OAuth)
 - Next.js
 
-## 🧪 실행 방법
+## Local
 
 1. `.env` 파일 생성:
 
