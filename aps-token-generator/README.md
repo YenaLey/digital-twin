@@ -1,4 +1,4 @@
-# APS 토큰 생성기
+# APS Token Generator
 
 Autodesk Platform Services(APS)의 2-legged 및 3-legged 인증 방식을 통해 APS Access Token을 생성할 수 있습니다.
 
@@ -39,8 +39,8 @@ Autodesk Platform Services(APS)의 2-legged 및 3-legged 인증 방식을 통해
 ## local dev
 
 ```bash
-git clone https://github.com/YenaLey/aps-token-generator.git
-cd aps-token-generator
+git clone https://github.com/YenaLey/digital-twin.git
+cd digital-twin/aps-token-generator
 npm install
 npm run dev
 ```
