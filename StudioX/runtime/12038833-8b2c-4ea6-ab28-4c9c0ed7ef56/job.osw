@@ -1,0 +1,10 @@
+{
+  "steps": [
+    {
+      "measure_dir_name": "gbxml_import",
+      "arguments": {
+        "gbxml_file": "/Users/leeyena/Yena_MAC/Project_Code/digital-twin/StudioX/runtime/12038833-8b2c-4ea6-ab28-4c9c0ed7ef56/model.xml"
+      }
+    }
+  ]
+}

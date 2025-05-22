@@ -1,0 +1,3 @@
+[13:24:41.891753 ERROR] [openstudio.WorkflowJSON] Cannot find measure 'gbxml_import'
+[13:24:41.891806 FATAL] [openstudio.workflow.OSWorkflow] Workflow is invalid
+[13:24:41.891895 ERROR] [openstudio.workflow.OSWorkflow] Found error in state 'Initialization' with message: '/Users/jenkins/git/OpenStudioFull/Openstudio/src/workflow/RunInitialization.cpp@63 : Workflow is invalid'

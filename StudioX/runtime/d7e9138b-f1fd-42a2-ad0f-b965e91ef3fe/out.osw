@@ -1,0 +1,28 @@
+{
+   "completed_at" : "20250521T042441Z",
+   "completed_status" : "Fail",
+   "file_paths" : 
+   [
+      "/Users/leeyena/Yena_MAC/Project_Code/digital-twin/StudioX/runtime/d7e9138b-f1fd-42a2-ad0f-b965e91ef3fe/generated_files",
+      "./files",
+      "./weather",
+      "../../files",
+      "../../weather",
+      "./"
+   ],
+   "hash" : "DF0E31D3",
+   "run_options" : null,
+   "seed_file" : "seeds/seed_empty.osm",
+   "steps" : 
+   [
+      {
+         "arguments" : 
+         {
+            "gbxml_file_name" : "gbxmls/test.xml"
+         },
+         "measure_dir_name" : "gbxml_import"
+      }
+   ],
+   "updated_at" : "20250521T042441Z",
+   "weather_file" : "weather/USA_CO_Denver.Intl.AP.725650_TMY3.epw"
+}

@@ -36,7 +36,7 @@ export default function Home() {
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold">APS Token Generator</h1>
         <a
-          href="https://github.com/YenaLey/aps-token-generator"
+          href="https://github.com/YenaLey/digital-twin.git"
           target="_blank"
           rel="noopener noreferrer"
           className="text-gray-600 hover:text-gray-900"

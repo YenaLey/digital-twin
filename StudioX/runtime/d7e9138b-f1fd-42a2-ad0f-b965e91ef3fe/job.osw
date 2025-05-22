@@ -1,0 +1,12 @@
+{
+  "seed_file": "seeds/seed_empty.osm",
+  "weather_file": "weather/USA_CO_Denver.Intl.AP.725650_TMY3.epw",
+  "steps": [
+    {
+      "measure_dir_name": "gbxml_import",
+      "arguments": {
+        "gbxml_file_name": "gbxmls/test.xml"
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+   "completed_at" : "20250521T043340Z",
+   "completed_status" : "Fail",
+   "file_paths" : 
+   [
+      "/Users/leeyena/Yena_MAC/Project_Code/digital-twin/StudioX/runtime/12038833-8b2c-4ea6-ab28-4c9c0ed7ef56/generated_files",
+      "./files",
+      "./weather",
+      "../../files",
+      "../../weather",
+      "./"
+   ],
+   "hash" : "C1E84779",
+   "run_options" : null,
+   "steps" : 
+   [
+      {
+         "arguments" : 
+         {
+            "gbxml_file" : "/Users/leeyena/Yena_MAC/Project_Code/digital-twin/StudioX/runtime/12038833-8b2c-4ea6-ab28-4c9c0ed7ef56/model.xml"
+         },
+         "measure_dir_name" : "gbxml_import"
+      }
+   ],
+   "updated_at" : "20250521T043340Z"
+}
